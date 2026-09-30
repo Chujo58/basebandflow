@@ -1,0 +1,7 @@
+[project]
+name = "basebandflow"
+version = "0.1.0"
+dependencies = ["typer", "canfar", "workflow.core", "pyyaml", "platformdirs"]
+
+[project.scripts]
+bbflow = "basebandflow.cli.main:app"

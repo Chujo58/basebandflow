@@ -1,0 +1,251 @@
+version: '2' # version of the workflow pipeline; as of 2024 Dec, there are two versions. Workflow v1 is being deprecated.
+name: {{ username }}-baseband-processing # name of your pipeline
+event_number: &event-number {{ event_id }} # for easy replacement later in the yaml file
+event_str: &event-str '{{ event_id }}'
+defaults: # every object in the pipeline will have these parameters
+  event: [*event-str]
+  site: canfar # to run this at canfar
+  user: {{ username }} # to keep track of who's submitting what job on the workflow website
+pipeline:
+  steps:
+  - name: stage-data
+    stage: 1
+    work:
+      command:
+      - datatrail
+      - pull
+      - chime.event.baseband.raw
+      - *event-str
+      - -vvv
+      - -f
+      - -c
+      - '4'
+      pipeline: baseband-{{ username }}-datatrail # name of the bucket this object will be deposited into and run from
+      priority: 3 # this is the default. 1 is lowest priority, 5 is highest priority.
+      tags:
+      - lowDM
+      - stage-data
+      timeout: 18000
+  - name: initialize
+    stage: 2
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.initialize
+      parameters:
+        event_number: *event-number
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - initialize
+      timeout: 600
+  - matrix:
+      job_id:
+        range:
+        - 1
+        - 64
+    name: refinement-tiedbeam
+    stage: 3
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.tiedbeam
+      parameters:
+        event_number: *event-number
+        job_id: {% raw %}${{ matrix.job_id }}{% endraw %}
+        parameters:
+        - baseband_pipeline
+        - refinement
+        - job_size
+        - '64'
+        - files_per_group
+        - '2'
+        site: canfar
+      pipeline: baseband-{{ username }}
+      retries: 3
+      tags:
+      - lowDM
+      - refinement
+      - tiedbeam
+      timeout: 1800
+  - name: refinement-merge
+    stage: 4
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.merge
+      parameters:
+        event_number: *event-number
+        parameters:
+        - baseband_pipeline
+        - refinement
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - refinement
+      - merge
+      timeout: 1800
+  - name: refinement-analysis
+    stage: 5
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.brightest
+      parameters:
+        event_number: *event-number
+        parameters:  # num_parallel_processes speeds up the MCMC localization component of this stage
+        - distributor_name
+        - baseband-refinement
+        - baseband_pipeline
+        - refinement
+        - num_parallel_processes
+        - '8'
+        site: canfar
+      pipeline: baseband-{{ username }}-brightest
+      tags:
+      - lowDM
+      - refinement
+      - analysis
+      timeout: 14400
+  - matrix:
+      job_id:
+        range:
+        - 1
+        - 64
+    name: localization-tiedbeam
+    stage: 6
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.tiedbeam
+      parameters:
+        event_number: *event-number
+        job_id: {% raw %}${{ matrix.job_id }}{% endraw %}
+        parameters:
+        - baseband_pipeline
+        - localization
+        - job_size
+        - '64'
+        - files_per_group
+        - '2'
+        - get_parameters_from_h5
+        - 'true'
+        site: canfar
+      pipeline: baseband-{{ username }}
+      retries: 3
+      tags:
+      - lowDM
+      - localization
+      - tiedbeam
+      timeout: 1800
+  - name: localization-merge
+    stage: 7
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.merge
+      parameters:
+        event_number: *event-number
+        parameters:
+        - baseband_pipeline
+        - localization
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - localization
+      - merge
+      timeout: 1200
+  - name: localization-analysis
+    stage: 8
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.localization
+      parameters:
+        event_number: *event-number
+        parameters:
+        - distributor_name
+        - baseband-localization
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - localization
+      - analysis
+      timeout: 1200
+  - matrix:
+      job_id:
+        range:
+        - 1
+        - 64
+    name: singlebeam-tiedbeam
+    stage: 9
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.tiedbeam
+      parameters:
+        event_number: *event-number
+        job_id: {% raw %}${{ matrix.job_id }}{% endraw %}
+        parameters:
+        - baseband_pipeline
+        - singlebeam
+        - job_size
+        - '64'
+        - files_per_group
+        - '2'
+        - get_parameters_from_h5
+        - 'true'
+        site: canfar
+      pipeline: baseband-{{ username }}
+      retries: 3
+      tags:
+      - lowDM
+      - singlebeam
+      - tiedbeam
+      timeout: 1800
+  - name: singlebeam-merge
+    stage: 10
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.merge
+      parameters:
+        event_number: *event-number
+        parameters:
+        - baseband_pipeline
+        - singlebeam
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - singlebeam
+      - merge
+      timeout: 1200
+  - name: singlebeam-analysis
+    stage: 11
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.waterfall
+      parameters:
+        event_number: *event-number
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - singlebeam
+      - analysis
+      - waterfall
+      timeout: 1200
+  - name: finalize
+    stage: 12
+    work:
+      function: baseband_analysis.pipelines.cluster.cluster_cli.finalize
+      parameters:
+        event_number: *event-number
+        site: canfar
+      pipeline: baseband-{{ username }}
+      tags:
+      - lowDM
+      - finalize
+      timeout: 1200
+  - if: always # should always run even if an earlier stage fails... in practice, doesn't seem to always be the case. For v2, this should be more reliable.
+    name: unstage-data
+    stage: 12
+    work:
+      command:
+      - datatrail
+      - clear
+      - chime.event.baseband.raw
+      - *event-str
+      - -vvv
+      - -f
+      pipeline: baseband-{{ username }}-datatrail
+      priority: 5
+      tags:
+      - lowDM
+      - unstage-data
