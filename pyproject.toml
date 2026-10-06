@@ -1,7 +1,9 @@
 [project]
 name = "basebandflow"
-version = "0.1.0"
-dependencies = ["typer", "canfar", "workflow.core", "pyyaml", "platformdirs"]
+dependencies = ["typer", "rich", "jinja2", "pyyaml", "pydantic", "platformdirs", "canfar", "pyjwt"]
 
 [project.scripts]
 bbflow = "basebandflow.cli.main:app"
+
+[tool.setuptools.package-data]
+basebandflow = ["templates/*.j2"]
