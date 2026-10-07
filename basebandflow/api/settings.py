@@ -4,8 +4,8 @@ from pathlib import Path
 import yaml
 from platformdirs import user_config_dir, user_data_dir
 
-from .errors import SettingsMissing
-from .models import Settings
+from basebandflow.api.errors import SettingsMissing
+from basebandflow.api.models import Settings
 
 APP = "bbflow"
 CONFIG_DIR = Path(user_config_dir(APP, appauthor=False))

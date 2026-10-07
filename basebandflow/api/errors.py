@@ -30,6 +30,10 @@ class TokenRefreshFailed(BBFlowError):
     """Unable to refresh the authentication token."""
 
 
+class InvalidTokens(BBFlowError):
+    """Tokens are invalid. Refresh them."""
+
+
 class ToolNotFound(BBFlowError):
     """Required command-line tool was not found on PATH"""
 

@@ -3,14 +3,22 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import jwt
 from platformdirs import user_state_dir
 
-from .errors import TokenRefreshFailed, ToolNotFound
-from .settings import load_settings
+from basebandflow.api.errors import (
+    InvalidTokens,
+    NotLoggedIn,
+    SettingsMissing,
+    TokenRefreshFailed,
+    ToolNotFound,
+)
+from basebandflow.api.models import TokenStatus
+from basebandflow.api.settings import load_settings
 
 REFRESH_MARGIN = timedelta(minutes=10)
 TOKEN_FILE = Path(user_state_dir("bbflow", appauthor=False)) / "chime_frb_tokens.json"
@@ -23,14 +31,22 @@ def require_tool(name: str) -> str:  # shutil.which, raises ToolNotFound
     return cmd_path
 
 
-def is_logged_in() -> bool | None:  # canfar probe; None = timeout/unknown
-    # First check if canfar exists in CLI:
-    require_tool("canfar")
-    # Then run the CLI auth info
-    completed_process = subprocess.run(
-        ["canfar", "ps"], check=False, text=True, timeout=30, capture_output=True
-    )
-    return completed_process.returncode == 0
+def is_logged_in() -> bool | None:
+    """True/False, or None if it couldn't be verified (timeout)."""
+    if shutil.which("canfar") is None:
+        return False
+    try:
+        r = subprocess.run(
+            ["canfar", "ps"],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return None
+    return r.returncode == 0
 
 
 def login_interactive() -> int:  # inherits terminal, returns exit code
@@ -91,30 +107,69 @@ def load_tokens() -> tuple[str | None, str | None]:
 
 
 def refresh_tokens() -> None:
-    require_tool("frb-api")  # whatever the real command is
+    require_tool("frb-api")
     settings = load_settings()
-    r = subprocess.run(
-        ["frb-api", "generate-tokens", "-u", settings.username],
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        timeout=60,
-        check=False,
-    )
-    if r.returncode != 0:
+    if settings is None:
+        raise SettingsMissing("No username set. Run `bbflow config init`.")
+    if not sys.stdin.isatty():
         raise TokenRefreshFailed(
-            "Token refresh command failed."
-        )  # don't echo output; it may contain secrets
+            "Token refresh needs a password; run `bbflow login` in a terminal."
+        )
+    try:
+        r = subprocess.run(
+            ["frb-api", "generate-tokens", "-u", settings.username],
+            stdout=subprocess.PIPE,  # capture the export lines; stdin/stderr stay on the terminal
+            text=True,
+            timeout=300,  # the user is typing, so be generous
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        raise TokenRefreshFailed("Token refresh timed out.") from None
+    if r.returncode != 0:
+        raise TokenRefreshFailed("Token refresh failed (wrong password?).")
     access, refresh = parse_exports(r.stdout)
     save_tokens(access, refresh)
+    _export_to_env(access, refresh)
 
 
-# def token_env() -> dict[str, str]:
-#     access, refresh = load_tokens()
-#     env = os.environ.copy()
-#     if access:  env["CHIME_FRB_ACCESS_TOKEN"] = access
-#     if refresh: env["CHIME_FRB_REFRESH_TOKEN"] = refresh
-#     return env
+def ensure_tokens_valid() -> None:
+    access, _ = load_tokens()
+    if not tokens_need_refresh(access):
+        return
+    refresh_tokens()
+    access, _ = load_tokens()
+    if tokens_need_refresh(access):
+        raise TokenRefreshFailed("Tokens are still expired after refresh.")
 
 
-# def ensure_ready_for_launch() -> None           # raises NotLoggedIn / TokenRefreshFailed
+def ensure_ready_for_launch() -> None:
+    require_tool("canfar")
+    require_tool("workflow")
+
+    logged_in = is_logged_in()
+    if logged_in is None:
+        raise NotLoggedIn(
+            "Couldn't reach CANFAR to verify your login. Check your connection and retry."
+        )
+    if not logged_in:
+        raise NotLoggedIn("Not logged in to CANFAR. Run `bbflow login`.")
+
+    ensure_tokens_valid()
+
+
+def _export_to_env(access: str, refresh: str) -> None:
+    os.environ["CHIME_FRB_ACCESS_TOKEN"] = access
+    os.environ["CHIME_FRB_REFRESH_TOKEN"] = refresh
+
+
+def _token_status(token: str | None) -> TokenStatus:
+    return TokenStatus(
+        present=bool(token),
+        remaining=token_time_remaining(token),
+        needs_refresh=tokens_need_refresh(token),
+    )
+
+
+def check_tokens() -> tuple[TokenStatus, TokenStatus]:
+    access, refresh = load_tokens()
+    return _token_status(access), _token_status(refresh)
