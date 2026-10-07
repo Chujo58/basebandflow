@@ -1,5 +1,7 @@
-import typer
+from datetime import timedelta
 from typing import Annotated
+
+import typer
 from rich.markup import escape
 
 from basebandflow.api.errors import SettingsMissing
@@ -44,11 +46,19 @@ def init():
 
 
 def parameter_complete():
-    return "username", "baseband_path"
+    return "username", "baseband_path", "refresh_timer"
 
 
 @config_app.command()
-def set(parameter: Annotated[str, typer.Argument(autocompletion=parameter_complete)]):
+def set(
+    parameter: Annotated[
+        str,
+        typer.Argument(
+            help=f"Choose between {', '.join(parameter_complete())} to update the configuration",
+            autocompletion=parameter_complete,
+        ),
+    ],
+):
     try:
         existing = load_settings()
     except SettingsMissing:  # includes corrupt: start fresh
@@ -77,6 +87,21 @@ def set(parameter: Annotated[str, typer.Argument(autocompletion=parameter_comple
             existing.model_copy(update={"baseband_path": path})
             if existing
             else Settings(baseband_path=path)
+        )
+        save_settings(settings)
+        console.print("[green]✔ Saved configuration[/green]")
+
+    if parameter == "refresh_timer":
+        time = typer.prompt(
+            "How many minutes until tokens need to be refreshed?",
+            default=existing.token_refresh_timer if existing else None,
+            value_proc=int,
+        )
+
+        settings = existing.model_copy(
+            update={"token_refresh_timer": time}
+            if existing
+            else Settings(token_refresh_timer=time)
         )
         save_settings(settings)
         console.print("[green]✔ Saved configuration[/green]")

@@ -9,7 +9,7 @@ from pydantic import BaseModel
 class Settings(BaseModel):
     username: str
     baseband_path: str | None = None  # None = use the container image's default
-    token_refresh_timer: int = timedelta(minutes=10)  # in minutes
+    token_refresh_timer: int = 10  # in minutes
 
 
 @dataclass

@@ -50,6 +50,6 @@ def _token_status(token: str | None, margin: timedelta) -> TokenStatus:
 def check_tokens() -> tuple[TokenStatus, TokenStatus]:
     settings = require_settings()
     access, refresh = load_tokens()
-    return _token_status(access, settings.token_refresh_timer), _token_status(
-        refresh, settings.token_refresh_timer
-    )
+    return _token_status(
+        access, timedelta(minutes=settings.token_refresh_timer)
+    ), _token_status(refresh, timedelta(minutes=settings.token_refresh_timer))
