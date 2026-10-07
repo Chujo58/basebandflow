@@ -18,7 +18,7 @@ from basebandflow.api.errors import (
     ToolNotFound,
 )
 from basebandflow.api.models import TokenStatus
-from basebandflow.api.settings import load_settings
+from basebandflow.api.settings import require_settings
 
 REFRESH_MARGIN = timedelta(minutes=10)
 TOKEN_FILE = Path(user_state_dir("bbflow", appauthor=False)) / "chime_frb_tokens.json"
@@ -108,9 +108,7 @@ def load_tokens() -> tuple[str | None, str | None]:
 
 def refresh_tokens() -> None:
     require_tool("frb-api")
-    settings = load_settings()
-    if settings is None:
-        raise SettingsMissing("No username set. Run `bbflow config init`.")
+    settings = require_settings()
     if not sys.stdin.isatty():
         raise TokenRefreshFailed(
             "Token refresh needs a password; run `bbflow login` in a terminal."

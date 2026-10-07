@@ -31,7 +31,7 @@ def show_banner(status: Status) -> None:
             }[/orange]"
         )
     else:
-        console.print("[yellow]✖ Tokens are invalid (choose 'Refresh tokens')")
+        console.print("[yellow]✖ Tokens are invalid. Run `bbflow tokens refresh`")
 
 
 def df_to_rich_table(

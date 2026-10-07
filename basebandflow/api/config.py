@@ -1,4 +1,3 @@
-import re
 from importlib.resources import files
 
 import yaml
@@ -6,33 +5,13 @@ from jinja2 import Environment, StrictUndefined
 
 from basebandflow.api.errors import (
     ConfigRenderError,
-    InvalidEventId,
-    InvalidUsername,
     TemplateError,
 )
 from basebandflow.api.models import RenderedConfig
 from basebandflow.api.settings import run_dir
+from basebandflow.api.validate import validate_event_id, validate_username
 
-_EVENT_ID_RE = re.compile(r"[0-9]+")  # ASCII digits only
-_USERNAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*")
 MATRIX_EXPR = "${{ matrix.job_id }}"
-
-
-def validate_event_id(event_id: str) -> str:
-    """Return the event ID unchanged if valid, else raise InvalidEventId."""
-    event_id = event_id.strip()  # forgive stray whitespace from copy/paste
-    if not _EVENT_ID_RE.fullmatch(event_id):
-        raise InvalidEventId(f"Event ID must be digits only (got {event_id!r}).")
-    return event_id
-
-
-def validate_username(username: str) -> str:
-    username = username.strip()
-    if not _USERNAME_RE.fullmatch(username):
-        raise InvalidUsername(
-            f"Username may only contain letters, digits, '_', '.', '-' (got {username!r})."
-        )
-    return username
 
 
 def load_template() -> str:  # importlib.resources

@@ -44,3 +44,7 @@ class DeployFailed(BBFlowError):
 
 class SessionError(BBFlowError):
     """The user session is invalid or could not be restored."""
+
+
+class SettingsCorrupt(SettingsMissing):
+    """Invalid configuration file. Reset it."""

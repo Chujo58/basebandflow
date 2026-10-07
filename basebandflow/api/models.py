@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel
 
 
 class Settings(BaseModel):
     username: str
+    baseband_path: str | None = None  # None = use the container image's default
 
     def to_dict(self):
         return {"username": self.username}
@@ -53,8 +55,18 @@ class RenderedConfig:
 
 
 @dataclass
-class JobInfo:
-    id: str
-    name: str
-    kind: str
-    status: str
+class Container:
+    session_name: str
+    session_id: str
+    bucket_name: str
+    type: Literal["datatrail", "analysis", "refinement"]
+    alive: bool  # True if alive/existing, False if dead and None if unspawned
+
+
+@dataclass
+class LaunchResult:
+    event_id: int
+    config_path: str
+    pipeline_id: str
+    pipeline_name: str
+    config_id: str

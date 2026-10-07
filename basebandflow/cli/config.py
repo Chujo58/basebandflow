@@ -1,22 +1,39 @@
 import typer
+from typing import Annotated
+from rich.markup import escape
 
-from basebandflow.api.config import validate_username
 from basebandflow.api.errors import SettingsMissing
 from basebandflow.api.models import Settings
-from basebandflow.api.settings import SETTINGS_FILE, load_settings, save_settings
+from basebandflow.api.settings import (
+    SETTINGS_FILE,
+    load_settings,
+    require_settings,
+    save_settings,
+)
+from basebandflow.api.validate import validate_username
 from basebandflow.cli.ui import console
 
 config_app = typer.Typer(help="Configuration of basebandflow", no_args_is_help=True)
 
 
 def run_init() -> Settings:
-    canfar_username = console.input("Enter your CANFAR username: ")
-    validated_username = validate_username(canfar_username)
-    new_settings = Settings(username=validated_username)
+    try:
+        existing = load_settings()
+    except SettingsMissing:  # includes corrupt: start fresh
+        existing = None
 
-    save_settings(new_settings)
-    console.print("[green]Saved configuration![/green]")
-    return new_settings
+    name = typer.prompt(
+        "CANFAR username", default=existing.username if existing else None
+    )
+    username = validate_username(name)
+    settings = (
+        existing.model_copy(update={"username": username})
+        if existing
+        else Settings(username=username)
+    )
+    save_settings(settings)
+    console.print("[green]✔ Saved configuration[/green]")
+    return settings
 
 
 @config_app.command()
@@ -26,13 +43,55 @@ def init():
         raise SettingsMissing("Missing username")
 
 
+def parameter_complete():
+    return "username", "baseband_path"
+
+
+@config_app.command()
+def set(parameter: Annotated[str, typer.Argument(autocompletion=parameter_complete)]):
+    try:
+        existing = load_settings()
+    except SettingsMissing:  # includes corrupt: start fresh
+        existing = None
+
+    if parameter == "username":
+        name = typer.prompt(
+            "CANFAR username", default=existing.username if existing else None
+        )
+        username = validate_username(name)
+        settings = (
+            existing.model_copy(update={"username": username})
+            if existing
+            else Settings(username=username)
+        )
+        save_settings(settings)
+        console.print("[green]✔ Saved configuration[/green]")
+
+    if parameter == "baseband_path":
+        path = typer.prompt(
+            "baseband-analysis PATH on CANFAR",
+            default=existing.baseband_path if existing else None,
+        )
+
+        settings = (
+            existing.model_copy(update={"baseband_path": path})
+            if existing
+            else Settings(baseband_path=path)
+        )
+        save_settings(settings)
+        console.print("[green]✔ Saved configuration[/green]")
+
+
 @config_app.command()
 def show():
-    settings = load_settings()
-    if not settings:
-        console.print("Not setup")
+    settings = require_settings()
 
-    console.print(f"CANFAR Username: {settings.username}")
+    console.print(
+        f"[dim]CANFAR username:[/dim] [cyan]{escape(settings.username)}[/cyan]"
+    )
+    console.print(
+        f"[dim]baseband path:  [/dim] [cyan]{escape(settings.baseband_path or '(default)')}[/cyan]"
+    )
 
 
 @config_app.command()
