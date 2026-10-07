@@ -23,6 +23,7 @@ def main(ctx: typer.Context):
         status = get_status()
 
     show_banner(status)
+    console.print(ctx.get_help())
     raise typer.Exit()
 
 

@@ -34,26 +34,84 @@ def spawn_datatrail_container(settings: Settings) -> tuple[Container]:
     return containers
 
 
+def build_container_env(
+    settings: Settings, access_token: str, refresh_token: str
+) -> dict:
+    env = {
+        "SITE": "canfar",
+        "CHIME_FRB_ACCESS_TOKEN": access_token,
+        "CHIME_FRB_REFRESH_TOKEN": refresh_token,
+        # 'PYTHONPATH': '/arc/home/user/baseband-analysis/' # you can set this if you want to run your local branch on this headless session
+    }
+
+    if settings.baseband_path is not None:
+        env.update({"PYTHONPATH": settings.baseband_path})
+    return env
+
+
 # Launch the analysis containers
-# def spawn_analysis_container(settings: Settings, tokens) -> tuple[Container]:
-#     payload = {
-#     "name": "clegue-baseband",
-#     "image": "images.canfar.net/chimefrb/baseband-analysis:latest",
-#     "cores": 2,
-#     "ram": 8,
-#     "kind": "headless",
-#     "cmd": "workflow",
-#     "args": "run --site=canfar baseband-clegue",
-#     "env": {
-#         "SITE": "canfar",
-#         "CHIME_FRB_ACCESS_TOKEN": CHIME_FRB_ACCESS_TOKEN,
-#         "CHIME_FRB_REFRESH_TOKEN": CHIME_FRB_REFRESH_TOKEN,
-#         "PYTHONPATH": BASEBAND_PATH,
-#         # 'PYTHONPATH': '/arc/home/user/baseband-analysis/' # you can set this if you want to run your local branch on this headless session
-#     },
-#     "replicas": 10,
-# }
+def spawn_analysis_container(
+    settings: Settings, access_token: str, refresh_token: str
+) -> tuple[Container]:
+    env = build_container_env(settings, access_token, refresh_token)
+
+    payload = {
+        "name": "baseband-analysis",
+        "image": "images.canfar.net/chimefrb/baseband-analysis:latest",
+        "cores": 2,
+        "ram": 8,
+        "kind": "headless",
+        "cmd": "workflow",
+        "args": f"run --site=canfar baseband-{settings.username}",
+        "env": env,
+        "replicas": 10,
+    }
+
+    session_ids = s.create(payload)
+    containers = []
+    for sid in session_ids:
+        container = Container(
+            payload.get("name"),
+            sid,
+            f"baseband-{settings.username}",
+            "analysis",
+            True,
+        )
+        containers.append(container)
+    return containers
+
+
 # Launch the refinement containers
+def spawn_refinement_container(
+    settings: Settings, access_token: str, refresh_token: str
+) -> tuple[Container]:
+    env = build_container_env(settings, access_token, refresh_token)
+
+    payload = {
+        "name": "baseband-refinement",
+        "image": "images.canfar.net/chimefrb/baseband-analysis:latest",
+        "cores": 8,
+        "ram": 32,
+        "kind": "headless",
+        "cmd": "workflow",
+        "args": f"run --log-level=INFO --site=canfar baseband-{settings.username}-brightest",
+        "env": env,
+        "replicas": 1,
+    }
+
+    session_ids = s.create(payload)
+    containers = []
+    for sid in session_ids:
+        container = Container(
+            payload.get("name"),
+            sid,
+            f"baseband-{settings.username}-brightest",
+            "refinement",
+            True,
+        )
+        containers.append(container)
+    return containers
+
 
 # Check health
 
