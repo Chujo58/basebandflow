@@ -1,4 +1,5 @@
 from importlib.resources import files
+from pathlib import Path
 
 import yaml
 from jinja2 import Environment, StrictUndefined
@@ -8,7 +9,6 @@ from basebandflow.api.errors import (
     TemplateError,
 )
 from basebandflow.api.models import RenderedConfig
-from basebandflow.api.settings import run_dir
 from basebandflow.api.validate import validate_event_id, validate_username
 
 MATRIX_EXPR = "${{ matrix.job_id }}"
@@ -18,7 +18,7 @@ def load_template() -> str:  # importlib.resources
     return (files("basebandflow") / "templates" / "pipeline_config.yaml.j2").read_text()
 
 
-def render_config(username: str, event_id: str) -> RenderedConfig:
+def render_config(username: str, event_id: str, directory: Path) -> RenderedConfig:
     username = validate_username(username)
     event_id = validate_event_id(event_id)
 
@@ -33,7 +33,7 @@ def render_config(username: str, event_id: str) -> RenderedConfig:
 
     _check_rendered(parsed, event_id)
 
-    path = run_dir(event_id) / "config.yaml"
+    path = directory / "config.yaml"
     path.write_text(
         text, encoding="utf-8"
     )  # exact rendered text: anchors and comments intact

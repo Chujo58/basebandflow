@@ -61,9 +61,10 @@ class Container:
     alive: bool  # True if alive/existing, False if dead and None if unspawned
 
 
-@dataclass
-class LaunchResult:
+# @dataclass
+class LaunchResult(BaseModel):
     event_id: int
+    status: Literal["deployed", "rendered", "running", "failed", "completed"]
     config_path: str
     pipeline_id: str
     pipeline_name: str

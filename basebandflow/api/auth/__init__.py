@@ -7,22 +7,23 @@ from basebandflow.api.auth.tokens import (
     token_time_remaining,
     tokens_need_refresh,
 )
-from basebandflow.api.errors import (
-    NotLoggedIn,
-    TokenRefreshFailed,
-)
+from basebandflow.api.errors import InvalidTokens, NotLoggedIn, TokenRefreshFailed
 from basebandflow.api.models import TokenStatus
 from basebandflow.api.settings import require_settings
 from basebandflow.tools import require_tool
 
 
-def ensure_tokens_valid() -> None:
+def tokens_valid() -> bool:
+    settings = require_settings()
+    margin = timedelta(minutes=settings.token_refresh_timer)
     access, _ = load_tokens()
-    if not tokens_need_refresh(access):
-        return
+    return not tokens_need_refresh(access, margin)
+
+
+def refresh_and_verify() -> None:
+    """Refresh (prompts for a password), then confirm the result. Call from the CLI, not from launch()."""
     refresh_tokens()
-    access, _ = load_tokens()
-    if tokens_need_refresh(access):
+    if not tokens_valid():
         raise TokenRefreshFailed("Tokens are still expired after refresh.")
 
 
@@ -35,8 +36,10 @@ def ensure_ready_for_launch() -> None:
         )
     if not logged_in:
         raise NotLoggedIn("Not logged in to CANFAR. Run `bbflow login`.")
-
-    ensure_tokens_valid()
+    if not tokens_valid():
+        raise InvalidTokens(
+            "CHIME/FRB tokens are expired or about to expire."
+        )  # no refresh here
 
 
 def _token_status(token: str | None, margin: timedelta) -> TokenStatus:

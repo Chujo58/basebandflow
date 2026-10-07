@@ -1,10 +1,15 @@
+# import re
+
 import nest_asyncio
 from canfar.sessions import Session
 
+from basebandflow import tools
 from basebandflow.api.models import Container, Settings
 
 nest_asyncio.apply()
 s = Session()
+
+# _STATUS_RE = re.compile(r"^\s*Status\s{2,}(\S.*?)\s*$", re.MULTILINE)
 
 
 # Launch the datatrail containers
@@ -20,7 +25,7 @@ def spawn_datatrail_container(settings: Settings) -> tuple[Container]:
         "env": {"SITE": "canfar"},
         "replicas": 2,
     }
-    session_ids = s.create(payload)
+    session_ids = s.create(**payload)
     containers = []
     for sid in session_ids:
         container = Container(
@@ -67,7 +72,7 @@ def spawn_analysis_container(
         "replicas": 10,
     }
 
-    session_ids = s.create(payload)
+    session_ids = s.create(**payload)
     containers = []
     for sid in session_ids:
         container = Container(
@@ -99,7 +104,7 @@ def spawn_refinement_container(
         "replicas": 1,
     }
 
-    session_ids = s.create(payload)
+    session_ids = s.create(**payload)
     containers = []
     for sid in session_ids:
         container = Container(
@@ -114,11 +119,16 @@ def spawn_refinement_container(
 
 
 # Check health
+def check_health(sid: str) -> str | None:
+    session_info = s.info(sid)
+    if session_info is not None:
+        session_info = session_info[0]  # grab the first one, this returns a list.
 
-# class PipelineContainers:
-#     def __init__(self, settings: Settings):
-#         if not settings:
+    return session_info.get("status")
 
-#         self.datatrail_container_name: str = ""
-#         self.pipeline_container_name: str = ""
-#         self.refinement_container_name: str = ""
+
+def check_existing_containers() -> list[str]:
+    sessions = s.fetch(kind="headless", status="Running")
+    names = [session.get("name") for session in sessions]
+
+    return names
