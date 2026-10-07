@@ -9,9 +9,7 @@ from pydantic import BaseModel
 class Settings(BaseModel):
     username: str
     baseband_path: str | None = None  # None = use the container image's default
-
-    def to_dict(self):
-        return {"username": self.username}
+    token_refresh_timer: int = timedelta(minutes=10)  # in minutes
 
 
 @dataclass
@@ -70,3 +68,4 @@ class LaunchResult:
     pipeline_id: str
     pipeline_name: str
     config_id: str
+    containers: list[Container]

@@ -37,7 +37,7 @@ def save_settings(settings: Settings) -> None:
 
 
 def require_settings() -> Settings:
-    """For code that can't proceed without settings (launch, refresh_tokens, update_setting)."""
+    """For code that can't proceed without settings."""
     settings = load_settings()
     if settings is None:
         raise SettingsMissing("No username set. Run `bbflow config init`.")

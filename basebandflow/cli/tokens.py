@@ -1,6 +1,7 @@
 import typer
 
-from basebandflow.api.auth import TOKEN_FILE, check_tokens, refresh_tokens
+from basebandflow.api.auth import check_tokens
+from basebandflow.api.auth.tokens import TOKEN_FILE, refresh_tokens
 from basebandflow.cli.ui import console, token_line
 
 tokens_app = typer.Typer(

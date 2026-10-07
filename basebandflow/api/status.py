@@ -5,11 +5,11 @@ from basebandflow.api.settings import load_settings
 
 
 def get_status() -> Status:
-    access, refresh = check_tokens()
     try:
         settings = load_settings()
     except SettingsMissing:
         settings = None
+    access, refresh = check_tokens()
 
     return Status(
         settings=settings,

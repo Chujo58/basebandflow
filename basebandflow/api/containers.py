@@ -3,8 +3,6 @@ from canfar.sessions import Session
 
 from basebandflow.api.models import Container, Settings
 
-# from basebandflow.api.settings import load_settings
-
 nest_asyncio.apply()
 s = Session()
 
@@ -37,6 +35,24 @@ def spawn_datatrail_container(settings: Settings) -> tuple[Container]:
 
 
 # Launch the analysis containers
+# def spawn_analysis_container(settings: Settings, tokens) -> tuple[Container]:
+#     payload = {
+#     "name": "clegue-baseband",
+#     "image": "images.canfar.net/chimefrb/baseband-analysis:latest",
+#     "cores": 2,
+#     "ram": 8,
+#     "kind": "headless",
+#     "cmd": "workflow",
+#     "args": "run --site=canfar baseband-clegue",
+#     "env": {
+#         "SITE": "canfar",
+#         "CHIME_FRB_ACCESS_TOKEN": CHIME_FRB_ACCESS_TOKEN,
+#         "CHIME_FRB_REFRESH_TOKEN": CHIME_FRB_REFRESH_TOKEN,
+#         "PYTHONPATH": BASEBAND_PATH,
+#         # 'PYTHONPATH': '/arc/home/user/baseband-analysis/' # you can set this if you want to run your local branch on this headless session
+#     },
+#     "replicas": 10,
+# }
 # Launch the refinement containers
 
 # Check health

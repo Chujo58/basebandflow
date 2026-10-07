@@ -1,6 +1,6 @@
 import typer
 
-from basebandflow.api.auth import is_logged_in, login_interactive
+from basebandflow.api.auth.canfar import is_logged_in, login_interactive
 from basebandflow.cli.ui import canfar_line, console
 
 login_app = typer.Typer(help="CANFAR login")

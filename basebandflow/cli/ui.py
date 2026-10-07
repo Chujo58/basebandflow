@@ -24,10 +24,10 @@ def show_banner(status: Status) -> None:
 
     if status.tokens_ok:
         console.print(
-            f"[green]✔ Tokens are valid until[/green][orange]{
-                (
-                    datetime.now().astimezone() + status.tokens_remaining_lifetime
-                ).strftime('%Y-%m-%d %H:%M:%S')
+            f"[green]✔ Tokens are valid until[/green] [orange]{
+                (datetime.now().astimezone() + status.access_token.remaining).strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
             }[/orange]"
         )
     else:
