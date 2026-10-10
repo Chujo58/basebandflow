@@ -11,7 +11,7 @@ import pandas as pd
 from rich.console import Console
 from rich.table import Table
 
-from basebandflow.api.models import Status, TokenStatus
+from basebandflow.models import Status, TokenStatus
 
 console = Console()
 
@@ -57,8 +57,10 @@ def df_to_rich_table(
     return table
 
 
-def print_table(title: str, data: dict[str, str]):
-    table = df_to_rich_table(pd.DataFrame.from_dict(data), title=title)
+def print_table(title: str, data: dict[str, str], show_index: bool = True):
+    table = df_to_rich_table(
+        pd.DataFrame.from_dict(data), title=title, show_index=show_index
+    )
     console.print(table)
 
 

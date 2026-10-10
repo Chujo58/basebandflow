@@ -8,8 +8,8 @@ from basebandflow.api.auth.tokens import (
     tokens_need_refresh,
 )
 from basebandflow.api.errors import InvalidTokens, NotLoggedIn, TokenRefreshFailed
-from basebandflow.api.models import TokenStatus
 from basebandflow.api.settings import require_settings
+from basebandflow.models import TokenStatus
 from basebandflow.tools import require_tool
 
 

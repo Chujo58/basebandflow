@@ -8,8 +8,8 @@ from basebandflow.api.errors import (
     ConfigRenderError,
     TemplateError,
 )
-from basebandflow.api.models import RenderedConfig
 from basebandflow.api.validate import validate_event_id, validate_username
+from basebandflow.models import RenderedConfig
 
 MATRIX_EXPR = "${{ matrix.job_id }}"
 

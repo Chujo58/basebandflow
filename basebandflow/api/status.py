@@ -1,7 +1,7 @@
 from basebandflow.api.auth import check_tokens, is_logged_in
 from basebandflow.api.errors import SettingsMissing
-from basebandflow.api.models import Status
 from basebandflow.api.settings import load_settings
+from basebandflow.models import Status
 
 
 def get_status() -> Status:

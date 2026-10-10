@@ -8,10 +8,10 @@ from basebandflow.api.auth import ensure_ready_for_launch
 from basebandflow.api.auth.tokens import load_tokens
 from basebandflow.api.config import render_config
 from basebandflow.api.containers import *
-from basebandflow.api.deployment import deploy
-from basebandflow.api.models import Container, LaunchResult, RenderedConfig
 from basebandflow.api.settings import require_settings, run_dir
 from basebandflow.api.validate import validate_event_id
+from basebandflow.api.workflow import deploy
+from basebandflow.models import Container, LaunchResult, RenderedConfig
 
 StepCallback = Callable[[str], None]
 
@@ -108,23 +108,24 @@ def launch(
     return result
 
 
-def count_existing_containers():
-    existing_containers = check_existing_containers()
+def count_existing_containers(existing_containers: list[Container]):
     datatrail_count = 0
     analysis_count = 0
     refinement_count = 0
     for container in existing_containers:
-        if "baseband-datatrail" in container:
+        if container.type == "datatrail":
             datatrail_count += 1
-        elif "baseband-analysis" in container:
+        if container.type == "analysis":
             analysis_count += 1
-        elif "baseband-refinement" in container:
+        if container.type == "refinement":
             refinement_count += 1
+
     return datatrail_count, analysis_count, refinement_count
 
 
 def skip_container_creation():
-    dtc, anc, rfc = count_existing_containers()
+    existing_containers = list_headless_containers()
+    dtc, anc, rfc = count_existing_containers(existing_containers)
     return dtc == 2, anc == 10, rfc == 1
 
 

@@ -1,11 +1,9 @@
-from datetime import timedelta
 from typing import Annotated
 
 import typer
 from rich.markup import escape
 
 from basebandflow.api.errors import SettingsMissing
-from basebandflow.api.models import Settings
 from basebandflow.api.settings import (
     SETTINGS_FILE,
     load_settings,
@@ -14,6 +12,7 @@ from basebandflow.api.settings import (
 )
 from basebandflow.api.validate import validate_username
 from basebandflow.cli.ui import console
+from basebandflow.models import Settings
 
 config_app = typer.Typer(help="Configuration of basebandflow", no_args_is_help=True)
 

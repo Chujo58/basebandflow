@@ -1,4 +1,11 @@
 from basebandflow import tools
+from basebandflow.api.settings import load_settings
+
+
+def abort(config_id: str):
+    settings = load_settings()
+    config_name = f"{settings.username}-baseband-processing"
+    return tools.workflow("configs", "stop", config_name, config_id)
 
 
 def parse_deploy(output: str):
@@ -37,3 +44,9 @@ def deploy(configuration_path: str):
 
 def stop(config_id: str, config_name: str):
     return tools.workflow("configs", "stop", config_name, config_id)
+
+
+def status(pipeline_id: str):
+    return tools.workflow(
+        "pipelines", "ps", pipeline_id, stderr=tools.subprocess.DEVNULL
+    )

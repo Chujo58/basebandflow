@@ -53,12 +53,15 @@ class RenderedConfig:
 
 
 @dataclass
-class Container:
+class Session:
     session_name: str
     session_id: str
-    bucket_name: str
+    status: str
+
+
+@dataclass
+class Container(Session):
     type: Literal["datatrail", "analysis", "refinement"]
-    alive: bool  # True if alive/existing, False if dead and None if unspawned
 
 
 # @dataclass

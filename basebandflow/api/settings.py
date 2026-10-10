@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -6,7 +6,7 @@ from platformdirs import user_config_dir, user_data_dir
 from pydantic import ValidationError
 
 from basebandflow.api.errors import SettingsCorrupt, SettingsMissing
-from basebandflow.api.models import Settings
+from basebandflow.models import Settings
 
 APP = "bbflow"
 CONFIG_DIR = Path(user_config_dir(APP, appauthor=False))

@@ -5,7 +5,15 @@ import typer
 
 from basebandflow.api.errors import BBFlowError
 from basebandflow.api.status import get_status
-from basebandflow.cli import config, launch, login, tokens
+from basebandflow.cli import (
+    config,
+    containers,
+    history,
+    launch,
+    login,
+    tokens,
+    workflow,
+)
 from basebandflow.cli.ui import console, print_error, show_banner
 
 app = typer.Typer(
@@ -28,9 +36,12 @@ def main(ctx: typer.Context):
 
 
 config.register(app)
+containers.register(app)
+history.register(app)
 launch.register(app)
 login.register(app)
 tokens.register(app)
+workflow.register(app)
 
 
 def run() -> None:
