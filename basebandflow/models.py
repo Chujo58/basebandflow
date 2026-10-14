@@ -1,5 +1,6 @@
-from dataclasses import dataclass
-from datetime import timedelta
+from collections import Counter
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -73,3 +74,24 @@ class LaunchResult(BaseModel):
     pipeline_name: str
     config_id: str
     containers: list[Container]
+
+
+@dataclass
+class PipelineStatus:
+    name: str
+    pipeline_id: str
+    state: str  # the pipeline's own "status:" value, e.g. "running"
+    current_stage: int | None
+    created: datetime | None
+    started: datetime | None
+    groups: dict[str, Counter] = field(
+        default_factory=dict
+    )  # step name -> Counter of states, in pipeline order
+
+    @property
+    def total(self) -> int:
+        return sum(sum(c.values()) for c in self.groups.values())
+
+    @property
+    def done(self) -> int:
+        return sum(c["done"] for c in self.groups.values())

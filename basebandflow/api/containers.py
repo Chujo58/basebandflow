@@ -71,12 +71,12 @@ def spawn_analysis_container(
         "name": "baseband-analysis",
         "image": baseband_analysis_image,
         "cores": 2,
-        "ram": 16,
+        "ram": 12,
         "kind": "headless",
         "cmd": "workflow",
         "args": f"run --site=canfar baseband-{settings.username}",
         "env": env,
-        "replicas": 5,
+        "replicas": 10,
     }
 
     session_ids = s.create(**payload)
