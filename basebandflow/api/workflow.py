@@ -6,7 +6,13 @@ from basebandflow.api.errors import BBFlowError
 from basebandflow.api.settings import load_settings
 from basebandflow.models import PipelineStatus
 
-SYMBOLS = {"✅": "done", "🏃": "running", "📅": "queued", "⚪": "waiting"}
+SYMBOLS = {
+    "✅": "done",
+    "🏃": "running",
+    "📅": "queued",
+    "⚪": "waiting",
+    "❌": "failed",
+}
 
 
 def abort(config_id: str):

@@ -100,6 +100,7 @@ STATE_STYLE = {
     "failure": "red",
     "failed": "red",
     "cancelled": "red",
+    "unknown": "magenta",
 }
 
 
@@ -107,6 +108,8 @@ def _group_symbol(c) -> str:
     total = sum(c.values())
     if c["unknown"]:
         return "[red]?[/red]"
+    if c["failed"]:
+        return "[red]✗[/red]"
     if c["running"]:
         return "[cyan]▶[/cyan]"
     if c["done"] == total:
@@ -125,6 +128,7 @@ def _group_counts(c) -> str:
             "running": "[cyan]running[/cyan]",
             "queued": "[yellow]queued[/yellow]",
             "waiting": "[dim]waiting[/dim]",
+            "failed": "[red]failed[/red]",
             "unknown": "[red]unknown[/red]",
         }[word]
     parts = []
