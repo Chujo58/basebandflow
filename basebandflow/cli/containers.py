@@ -1,6 +1,7 @@
 import typer
 from rich.table import Table
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.auth import refresh_and_verify
 from basebandflow.api.containers import *
 from basebandflow.api.errors import InvalidTokens, SettingsMissing
@@ -8,7 +9,7 @@ from basebandflow.cli.config import run_init
 from basebandflow.cli.ui import console
 
 container_app = typer.Typer(
-    help="Create, list and delete containers for the baseband pipeline",
+    help=docs.CONTAINERS_TYPER,
     no_args_is_help=True,
 )
 
@@ -32,14 +33,13 @@ def filter_complete():
     return "datatrail", "analysis", "refinement"
 
 
-@container_app.command("create", no_args_is_help=True)
+@container_app.command("create", no_args_is_help=True, help=docs.CONTAINER_CREATE)
 def create(
     session_type: str = typer.Argument(
         None,
         help=f"Type of session: {', '.join(filter_complete())}",
     ),
 ):
-    """Creates CANFAR headless sessions required for the baseband-analysis pipeline."""
     if not session_type or session_type not in filter_complete():
         console.print(f"Invalid session type selected: [red]{session_type}[/red]")
         console.print(f"Please select from: [dim]{', '.join(filter_complete())}[/dim]")
@@ -58,13 +58,12 @@ def create(
         refresh_and_verify()
 
 
-@container_app.command("list")
+@container_app.command("list", help=docs.CONTAINER_LIST)
 def list_cmd(
     filtering: str = typer.Option(
         None, "--filter", "-f", autocompletion=filter_complete
     ),
 ):
-    """List CANFAR headless sessions."""
     containers = list_headless_containers()
     if filtering:
         containers = [c for c in containers if c.type == filtering]
@@ -102,11 +101,10 @@ def list_cmd(
         )
 
 
-@container_app.command("delete", no_args_is_help=True)
+@container_app.command("delete", no_args_is_help=True, help=docs.CONTAINER_DELETE)
 def delete(
     session_id: str = typer.Argument(help="CANFAR session ID"),
 ):
-    """Deletes CANFAR headless sessions based on session ID."""
     if not session_id:
         console.print(f"Invalid session ID: {session_id}")
         typer.Exit(1)
@@ -118,14 +116,13 @@ def delete(
         console.print("Session deletion unsuccessful.")
 
 
-@container_app.command("prune", no_args_is_help=True)
+@container_app.command("prune", no_args_is_help=True, help=docs.CONTAINER_PRUNE)
 def prune(
     session_type: str = typer.Argument(
         None,
         help=f"Type of session: {', '.join(filter_complete())}",
     ),
 ):
-    """Deletes CANFAR headless sessions based on session type."""
     if not session_type or session_type not in filter_complete():
         console.print(f"Invalid session type selected: [red]{session_type}[/red]")
         console.print(f"Please select from: [dim]{', '.join(filter_complete())}[/dim]")

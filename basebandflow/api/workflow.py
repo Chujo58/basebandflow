@@ -21,6 +21,13 @@ def abort(config_id: str):
     return tools.workflow("configs", "stop", config_name, config_id)
 
 
+def open(config_id: str):
+    settings = load_settings()
+    config_name = f"{settings.username}-baseband-processing"
+    url = f"https://frb.chimenet.ca/workflow/web/CHIMEFRB/pipelinesv2/{config_name}/{config_id}"
+    return url
+
+
 def parse_deploy(output: str):
     name = None
     config_id = None

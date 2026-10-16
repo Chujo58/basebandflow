@@ -8,6 +8,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.auth import refresh_and_verify
 from basebandflow.api.errors import InvalidTokens, SettingsMissing
 from basebandflow.api.launch import launch, step_count
@@ -56,9 +57,8 @@ def _run_with_progress(event_id: str, dry_run: bool) -> LaunchResult:
     return result
 
 
-@launch_app.command("launch", no_args_is_help=True)
+@launch_app.command("launch", no_args_is_help=True, help=docs.LAUNCH_LAUNCH)
 def launch_cmd(event_id: str, dry_run: bool = typer.Option(False, "--dry-run")):
-    """Launch the baseband pipeline"""
     for attempt in range(3):  # bounded, so it can never loop forever
         try:
             result = _run_with_progress(event_id, dry_run)

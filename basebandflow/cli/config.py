@@ -3,6 +3,7 @@ from typing import Annotated
 import typer
 from rich.markup import escape
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.errors import SettingsMissing
 from basebandflow.api.settings import (
     SETTINGS_FILE,
@@ -14,7 +15,7 @@ from basebandflow.api.validate import validate_username
 from basebandflow.cli.ui import console
 from basebandflow.models import Settings
 
-config_app = typer.Typer(help="Configuration of basebandflow", no_args_is_help=True)
+config_app = typer.Typer(help=docs.CONFIG_TYPER, no_args_is_help=True)
 
 
 def run_init() -> Settings:
@@ -37,7 +38,7 @@ def run_init() -> Settings:
     return settings
 
 
-@config_app.command()
+@config_app.command(help=docs.CONFIG_INIT)
 def init():
     settings = run_init()
     if not settings.username:
@@ -48,7 +49,7 @@ def parameter_complete():
     return "username", "baseband_path", "refresh_timer"
 
 
-@config_app.command()
+@config_app.command(help=docs.CONFIG_SET)
 def set(
     parameter: Annotated[
         str,
@@ -106,7 +107,7 @@ def set(
         console.print("[green]✔ Saved configuration[/green]")
 
 
-@config_app.command()
+@config_app.command(help=docs.CONFIG_SHOW)
 def show():
     settings = require_settings()
 
@@ -118,7 +119,7 @@ def show():
     )
 
 
-@config_app.command()
+@config_app.command(help=docs.CONFIG_PATH)
 def path():
     console.print(f"Configuration is saved at: {SETTINGS_FILE}")
 

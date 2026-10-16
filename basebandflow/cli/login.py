@@ -1,14 +1,14 @@
 import typer
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.auth.canfar import is_logged_in, login_interactive
 from basebandflow.cli.ui import canfar_line, console
 
-login_app = typer.Typer(help="CANFAR login")
+login_app = typer.Typer(help=docs.LOGIN_TYPER)
 
 
-@login_app.command()
-def login(check: bool = typer.Option(False, "--check", help="Report status only")):
-    """Log in to CANFAR."""
+@login_app.command(help=docs.LOGIN_LOGIN)
+def login(check: bool = typer.Option(False, "--check", help=docs.LOGIN_CHECK)):
     if check:
         ok = is_logged_in()
         console.print(canfar_line(ok))

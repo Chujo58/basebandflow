@@ -2,10 +2,11 @@ import typer
 from rich.markup import escape
 from rich.table import Table
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.history import RunRecord, latest_run, list_runs
 from basebandflow.cli.ui import console
 
-history_app = typer.Typer(help="Past launches", invoke_without_command=True)
+history_app = typer.Typer(help=docs.HISTORY_TYPER, invoke_without_command=True)
 
 _STATUS_STYLE = {
     "running": "green",
@@ -20,14 +21,13 @@ def _when(rec: RunRecord) -> str:
     return rec.started.strftime("%Y-%m-%d %H:%M") if rec.started else "?"
 
 
-@history_app.callback()
+@history_app.callback(help=docs.HISTORY_HISTORY)
 def history(
     ctx: typer.Context,
     event: str | None = typer.Option(None, "--event", "-e", help="Only this event ID"),
     limit: int = typer.Option(10, "--limit", "-n", min=1, help="How many runs to show"),
     all_: bool = typer.Option(False, "--all", "-a", help="Include dry runs"),
 ):
-    """List recent launches, newest first."""
     if ctx.invoked_subcommand is not None:
         return
 
@@ -63,11 +63,10 @@ def history(
     console.print(table)
 
 
-@history_app.command("show")
+@history_app.command("show", help=docs.HISTORY_SHOW)
 def show(
-    event_id: str = typer.Argument(..., help="Event ID (shows its most recent launch)"),
+    event_id: str = typer.Argument(..., help=docs.EID),
 ):
-    """Details of the most recent launch for an event."""
     rec = latest_run(event_id)
     if rec is None:
         console.print(f"[yellow]No launches found for {escape(event_id)}.[/yellow]")
