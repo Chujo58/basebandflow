@@ -61,7 +61,11 @@ def create(
 @container_app.command("list", help=docs.CONTAINER_LIST)
 def list_cmd(
     filtering: str = typer.Option(
-        None, "--filter", "-f", autocompletion=filter_complete
+        None,
+        "--filter",
+        "-f",
+        autocompletion=filter_complete,
+        help=f"Type of session: {', '.join(filter_complete())}",
     ),
 ):
     containers = list_headless_containers()
