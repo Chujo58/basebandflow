@@ -16,6 +16,7 @@ $ bbflow [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
+* `version`: Show the bbflow version
 * `config`: Configuration of basebandflow (bbflow)
 * `containers`: Commands to manage CANFAR headless...
 * `history`: List recent launches, newest first
@@ -23,6 +24,20 @@ $ bbflow [OPTIONS] COMMAND [ARGS]...
 * `login`: Log in to your CANFAR account
 * `tokens`: Manage CHIME/FRB API tokens
 * `workflow`: Workflow related commands
+
+## `bbflow version`
+
+Show the bbflow version
+
+**Usage**:
+
+```console
+$ bbflow version [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ## `bbflow config`
 
