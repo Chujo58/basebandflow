@@ -38,6 +38,10 @@ bbflow <command>
 ---
 
 ## 📖 CLI Reference
+For a full list of all available commands, options, and flags, see the auto-generated [CLI Reference Guide](CLI_REFERENCE.md).
+
+
+<!-- ## 📖 CLI Reference
 
 The interface is broken down into several modular subcommands:
 
@@ -58,9 +62,9 @@ The interface is broken down into several modular subcommands:
 
 > 💡 *To view detailed arguments and options for any group, run `bbflow <group> --help`.*
 
-> ⚠️ **More information about the commands in [CLI Reference](CLI_REFERENCE.md)**
+> ⚠️ **More information about the commands in [CLI Reference](CLI_REFERENCE.md)** -->
 
----
+<!-- --- -->
 
 <!-- ## 🧪 Development
 
