@@ -42,3 +42,6 @@ WORKFLOW_ABORT = "Abort the Workflow deployment"
 WORKFLOW_OPEN = "Opens the Workflow page for the configuration"
 WORKFLOW_STATUS = "Loads the status of the Workflow deployment"
 WORKFLOW_TYPER = "Commands to access Workflow"
+
+# Version
+VERSION = "Show the bbflow version"

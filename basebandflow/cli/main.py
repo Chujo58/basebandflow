@@ -1,8 +1,11 @@
 import os
+import platform
 import sys
+from importlib.metadata import version as pkg_version
 
 import typer
 
+import basebandflow.cli.documentation as docs
 from basebandflow.api.errors import BBFlowError
 from basebandflow.api.status import get_status
 from basebandflow.cli import (
@@ -42,6 +45,13 @@ launch.register(app)
 login.register(app)
 tokens.register(app)
 workflow.register(app)
+
+
+@app.command(help=docs.VERSION)
+def version():
+    console.print(f"[bold cyan]bbflow[/] [bold green]{pkg_version('basebandflow')}[/]")
+    console.print(f"[dim]Python[/]   {platform.python_version()}")
+    console.print(f"[dim]Platform[/] {platform.system()} {platform.machine()}")
 
 
 def run() -> None:
