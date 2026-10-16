@@ -156,7 +156,7 @@ $ bbflow containers list [OPTIONS]
 
 **Options**:
 
-* `-f, --filter <str>`
+* `-f, --filter <str>`: Type of session: datatrail, analysis, refinement
 * `--help`: Show this message and exit.
 
 ### `bbflow containers delete`
