@@ -2,6 +2,7 @@
 name = "basebandflow"
 dependencies = ["typer", "rich", "jinja2", "pyyaml", "pydantic", "platformdirs", "canfar", "pyjwt", "pandas", "chime-frb-api"]
 version = "1.0"
+requires-python = ">=3.12"
 
 [project.scripts]
 bbflow = "basebandflow.cli.main:run"
