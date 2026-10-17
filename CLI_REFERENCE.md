@@ -153,7 +153,7 @@ $ bbflow containers create [OPTIONS] [session_type]
 
 **Arguments**:
 
-* `session_type`: Type of session: datatrail, analysis, refinement
+* `session_type`: Type of session: datatrail, analysis, refinement, all
 
 **Options**:
 
@@ -171,7 +171,7 @@ $ bbflow containers list [OPTIONS]
 
 **Options**:
 
-* `-f, --filter <str>`: Type of session: datatrail, analysis, refinement
+* `-f, --filter <str>`: Type of session: datatrail, analysis, refinement, all
 * `--help`: Show this message and exit.
 
 ### `bbflow containers delete`
@@ -204,7 +204,7 @@ $ bbflow containers prune [OPTIONS] [session_type]
 
 **Arguments**:
 
-* `session_type`: Type of session: datatrail, analysis, refinement
+* `session_type`: Type of session: datatrail, analysis, refinement, all
 
 **Options**:
 
