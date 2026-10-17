@@ -30,7 +30,7 @@ def style_status(status: str) -> str:
 
 
 def filter_complete():
-    return "datatrail", "analysis", "refinement"
+    return "datatrail", "analysis", "refinement", "all"
 
 
 @container_app.command("create", no_args_is_help=True, help=docs.CONTAINER_CREATE)
@@ -46,6 +46,12 @@ def create(
         typer.Exit(1)
 
     try:
+        if session_type == "all":
+            initialize_session_container("datatrail")
+            initialize_session_container("analysis")
+            initialize_session_container("refinement")
+            return
+
         initialize_session_container(session_type)
     except SettingsMissing:
         if not typer.confirm("No username set. Set it now?", default=True):
@@ -69,7 +75,7 @@ def list_cmd(
     ),
 ):
     containers = list_headless_containers()
-    if filtering:
+    if filtering and filtering != "all":
         containers = [c for c in containers if c.type == filtering]
 
     table = Table(
@@ -132,11 +138,21 @@ def prune(
         console.print(f"Please select from: [dim]{', '.join(filter_complete())}[/dim]")
         typer.Exit(1)
 
+    if session_type == "all":
+        process_session_deletion("datatrail")
+        process_session_deletion("analysis")
+        process_session_deletion("refinement")
+        return
+
+    process_session_deletion(session_type)
+
+
+def process_session_deletion(session_type):
     res = prune_containers(session_type)
     if res:
-        console.print("Session deletion successful.")
+        console.print(f"Session {session_type} deletion successful.")
     else:
-        console.print("Session deletion unsuccessful.")
+        console.print(f"Session {session_type} deletion unsuccessful.")
 
 
 def register(app: typer.Typer):
