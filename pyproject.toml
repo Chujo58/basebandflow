@@ -1,7 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "basebandflow"
-dependencies = ["typer", "rich", "jinja2", "pyyaml", "pydantic", "platformdirs", "canfar", "pyjwt", "pandas", "chime-frb-api", "nest_asyncio"]
-version = "1.0"
+dynamic = ["version"] # <-- Tells setuptools the version is calculated dynamically
+dependencies = [
+    "typer", "rich", "jinja2", "pyyaml", "pydantic", 
+    "platformdirs", "canfar", "pyjwt", "pandas", 
+    "chime-frb-api", "nest_asyncio"
+]
 requires-python = ">=3.12"
 
 [project.scripts]
@@ -9,3 +17,6 @@ bbflow = "basebandflow.cli.main:run"
 
 [tool.setuptools.package-data]
 basebandflow = ["templates/*.j2"]
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0-dev"
