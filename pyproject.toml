@@ -10,10 +10,23 @@ dependencies = [
     "platformdirs", "canfar", "pyjwt", "pandas", 
     "chime-frb-api", "nest_asyncio"
 ]
+description = "Some scripts and utilities to submit jobs to workflow for the baseband-analysis pipeline"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Chloé Legué", email = "chloe.legue@mail.mcgill.ca" }]
+readme = "README.md"
+keywords = ["baseband", "pipeline"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 
 [project.scripts]
 bbflow = "basebandflow.cli.main:run"
+
+[project.urls]
+Homepage = "https://github.com/Chujo58/basebandflow"
 
 [tool.setuptools.package-data]
 basebandflow = ["templates/*.j2"]
